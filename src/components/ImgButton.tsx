@@ -14,15 +14,17 @@ interface Props {
   style?: CSSProperties;
   fontSize?: number;
   className?: string;
+  noShopScroll?: boolean;
 }
 
 /** PNG 아틀라스 기반 이미지 버튼 (텍스트 라벨 오버레이) */
-export function ImgButton({ label, onClick, kind = 'wood', width = 200, height = 64, disabled, style, fontSize = 20, className }: Props) {
+export function ImgButton({ label, onClick, kind = 'wood', width = 200, height = 64, disabled, style, fontSize = 20, className, noShopScroll }: Props) {
   const { atlas } = useAssets();
   const frame = kind === 'wood' ? UI.btnWood : kind === 'red' ? UI.btnRed : UI.btnRound;
   return (
     <div
       className={'relative select-none ' + (className ?? '')}
+      data-shop-no-scroll={noShopScroll ? 'true' : undefined}
       style={{
         width, height,
         opacity: disabled ? 0.45 : 1,
@@ -44,7 +46,7 @@ export function ImgButton({ label, onClick, kind = 'wood', width = 200, height =
       />
       <div
         className="absolute inset-0 flex items-center justify-center font-black text-white stroke"
-        style={{ fontSize, letterSpacing: 1 }}
+        style={{ fontSize, letterSpacing: 0.5, padding: '0 18px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
       >
         {label}
       </div>

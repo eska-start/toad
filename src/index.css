@@ -47,3 +47,16 @@ html, body, #root {
 .anim-steam { animation: steamRise 1.6s ease-out infinite; }
 .anim-shake { animation: shakeX 0.3s ease-in-out infinite; }
 .anim-wobble { animation: wobble 0.6s ease-in-out infinite; }
+
+.shop-scroll {
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.shop-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}

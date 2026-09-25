@@ -11,6 +11,7 @@ import { AddStep, FireStep, HeatStep, PourStep, ShakeStep, StirStep, STOVE, Tran
 import { MixStep, NoodleStep, PlateStep, ServeStep } from './steps/NoodleSteps';
 import { ChopStep, FryStep, ShapeStep, TossStep } from './steps/FrySteps';
 import { sfx } from '../../game/sfx';
+import { ImgButton } from '../ImgButton';
 
 interface Cook {
   menu: MenuId;
@@ -33,6 +34,7 @@ interface Props {
   preferredMenu: MenuId | null;
   practice?: boolean;
   onPracticeBack?: () => void;
+  onMainMenu?: () => void;
 }
 
 export function GameScreen(props: Props) {
@@ -43,7 +45,7 @@ export function GameScreen(props: Props) {
   );
 }
 
-function GameInner({ save, onMoney, onDayEnd, preferredMenu, practice, onPracticeBack }: Props) {
+function GameInner({ save, onMoney, onDayEnd, preferredMenu, practice, onPracticeBack, onMainMenu }: Props) {
   const { atlas, bg } = useAssets();
   const { dragging } = useDrag();
   const day = save.day;
@@ -344,6 +346,13 @@ function GameInner({ save, onMoney, onDayEnd, preferredMenu, practice, onPractic
     cancelTimer.current = window.setTimeout(() => setCancelArmed(false), 3000);
   };
 
+  const returnToMainMenu = () => {
+    const message = cook
+      ? '조리 중인 음식과 오늘 영업 진행을 취소하고 메인 메뉴로 돌아갈까요?'
+      : '오늘 영업을 종료하고 메인 메뉴로 돌아갈까요?';
+    if (confirm(message)) onMainMenu?.();
+  };
+
   // ── 두꺼비 포즈 ──
   const toadPose: ToadPose = toadFlash ?? (cook ? toadBase : 'idle1');
   const toadFrames = useMemo(() => (toadPose === 'idle1' && !cook ? [TOAD.idle1, TOAD.idle2] : [TOAD[toadPose]]), [toadPose, cook]);
@@ -388,6 +397,17 @@ function GameInner({ save, onMoney, onDayEnd, preferredMenu, practice, onPractic
             <span className="font-black text-yellow-200" style={{ fontSize: 11 }}>메뉴로</span>
           </div>
         </>
+      )}
+      {!practice && onMainMenu && (
+        <ImgButton
+          label="메인 메뉴"
+          onClick={returnToMainMenu}
+          kind="wood"
+          width={64}
+          height={30}
+          fontSize={10}
+          style={{ position: 'absolute', right: 4, top: 42, zIndex: 12 }}
+        />
       )}
       {/* ── 상단: 간판/돈/일차 ── */}
       <div className="absolute pointer-events-none" style={{ left: 0, top: 0, width: 360, height: 74, zIndex: 10 }}>
@@ -463,9 +483,10 @@ function GameInner({ save, onMoney, onDayEnd, preferredMenu, practice, onPractic
       </div>
 
       {/* ── 하단 재료 트레이 ── */}
-      <div className="absolute" style={{ left: 0, top: 517, width: 360, height: 123, zIndex: 9 }}>
-        <SpriteBox src={atlas.ui} frame={UI.panel} width={360} height={123} style={{ position: 'absolute', inset: 0, opacity: 0.95 }} />
-        <div className="absolute" style={{ left: 8, top: 6, width: 300, height: 112, display: 'flex', flexWrap: 'wrap', alignContent: 'flex-start' }}>
+      {/* ── 하단 재료 트레이 ── */}
+      <div className="absolute" style={{ left: -12, top: 510, width: 384, height: 130, zIndex: 9 }}>
+        <SpriteBox src={atlas.ui} frame={UI.panel} width={384} height={130} style={{ position: 'absolute', inset: 0, opacity: 0.98 }} />
+        <div className="absolute" style={{ left: 58, top: 16, width: 254, height: 96, display: 'flex', flexWrap: 'wrap', alignContent: 'flex-start', gap: '3px 2px' }}>
           {trayItems.map((id) => (
             <TrayItem key={id} id={id} highlight={neededNow.includes(id)} dim={neededNow.length > 0 && !neededNow.includes(id)} />
           ))}
@@ -481,11 +502,11 @@ function GameInner({ save, onMoney, onDayEnd, preferredMenu, practice, onPractic
           data-drop="trash"
           onClick={cancelCook}
           className={orderCustomerLeft && cook ? 'absolute anim-pulse' : 'absolute'}
-          style={{ right: 2, top: 18, width: 60, height: 86, border: 0, padding: 0, background: 'transparent', cursor: cook ? 'pointer' : 'default', touchAction: 'manipulation', opacity: cook ? 1 : 0.5 }}
+          style={{ right: 18, top: 18, width: 48, height: 76, border: 0, padding: 0, background: 'transparent', cursor: cook ? 'pointer' : 'default', touchAction: 'manipulation', opacity: cook ? 1 : 0.5 }}
         >
-          <Sprite src={atlas.ui} frame={UI.btnRound} size={60} className="pointer-events-none" style={{ position: 'absolute', top: 0, left: 0, filter: orderCustomerLeft ? 'drop-shadow(0 0 8px #ff8e55)' : undefined }} />
-          <Sprite src={atlas.ui} frame={orderCustomerLeft ? UI.x : UI.trash} size={32} className="pointer-events-none" style={{ position: 'absolute', left: 14, top: 12 }} />
-          <span className="absolute font-black text-white stroke-thin pointer-events-none" style={{ left: 0, top: 63, width: 60, fontSize: 10 }}>{cancelArmed && !orderCustomerLeft ? '다시 누르기' : '조리 취소'}</span>
+          <Sprite src={atlas.ui} frame={UI.btnRound} size={48} className="pointer-events-none" style={{ position: 'absolute', top: 0, left: 0, filter: orderCustomerLeft ? 'drop-shadow(0 0 8px #ff8e55)' : undefined }} />
+          <Sprite src={atlas.ui} frame={orderCustomerLeft ? UI.x : UI.trash} size={24} className="pointer-events-none" style={{ position: 'absolute', left: 12, top: 12 }} />
+          <span className="absolute font-black text-white stroke-thin pointer-events-none" style={{ left: 0, top: 52, width: 48, fontSize: 9 }}>{cancelArmed && !orderCustomerLeft ? '다시 누르기' : '조리 취소'}</span>
         </button>
       </div>
     </div>
@@ -496,10 +517,10 @@ function TrayItem({ id, highlight, dim }: { id: IngredientId; highlight: boolean
   const { atlas } = useAssets();
   const { startDrag } = useDrag();
   return (
-    <div className="flex flex-col items-center" style={{ width: 50, height: 56, touchAction: 'none', opacity: dim ? 0.55 : 1 }}
+    <div className="flex flex-col items-center justify-center" style={{ width: 48, height: 42, touchAction: 'none', opacity: dim ? 0.55 : 1, cursor: 'grab' }}
       onPointerDown={(e) => startDrag(e, { type: 'ingredient', id, atlas: 'ingredients', frame: ING[id], size: 60 })}>
-      <Sprite src={atlas.ingredients} frame={ING[id]} size={44} className={highlight ? 'anim-pulse' : ''} style={{ filter: highlight ? 'drop-shadow(0 0 6px #ffe56a)' : 'drop-shadow(0 2px 2px rgba(0,0,0,0.3))' }} />
-      <div className="font-bold" style={{ fontSize: 9, color: highlight ? '#b3261e' : '#4a2a12', marginTop: -2 }}>{ING_NAME[id]}</div>
+      <Sprite src={atlas.ingredients} frame={ING[id]} size={28} className={highlight ? 'anim-pulse' : ''} style={{ filter: highlight ? 'drop-shadow(0 0 6px #ffe56a)' : 'drop-shadow(0 2px 2px rgba(0,0,0,0.3))' }} />
+      <div className="font-bold text-center" style={{ width: '100%', fontSize: 8.5, lineHeight: '10px', color: highlight ? '#b3261e' : '#4a2a12', marginTop: 1, wordBreak: 'keep-all' }}>{ING_NAME[id]}</div>
     </div>
   );
 }

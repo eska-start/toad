@@ -99,7 +99,7 @@ export default function App() {
           />
         )}
         {screen === 'menu' && <MenuBoard save={save} onOpen={(m) => { setPreferred(m); setGameKey((k) => k + 1); setScreen('game'); }} onShop={() => setScreen('shop')} />}
-        {screen === 'game' && <GameScreen key={gameKey} save={save} onMoney={onMoney} onDayEnd={onDayEnd} preferredMenu={preferred} />}
+        {screen === 'game' && <GameScreen key={gameKey} save={save} onMoney={onMoney} onDayEnd={onDayEnd} preferredMenu={preferred} onMainMenu={() => setScreen('title')} />}
         {screen === 'dayend' && dayStats && <DayEndScreen day={endedDay} stats={dayStats} onNext={() => setScreen('shop')} />}
         {screen === 'shop' && <ShopScreen save={save} onBuy={buy} onDone={() => setScreen('menu')} />}
         {screen === 'practice' && <PracticeScreen onBack={() => setScreen('title')} />}

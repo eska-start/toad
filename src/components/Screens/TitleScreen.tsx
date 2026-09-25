@@ -24,7 +24,7 @@ export function TitleScreen({ save, onStart, onReset, onPractice }: { save: Save
       </div>
       {/* 버튼 */}
       <div className="absolute w-full flex flex-col items-center gap-3" style={{ bottom: 40 }}>
-        <ImgButton label={hasSave ? `이어서 영업하기 (Day ${save.day})` : '영업 시작'} onClick={onStart} kind="red" width={250} height={70} fontSize={hasSave ? 19 : 24} className="anim-pulse" />
+        <ImgButton label={hasSave ? `이어서 영업하기 (Day ${save.day})` : '영업 시작'} onClick={onStart} kind="red" width={276} height={68} fontSize={hasSave ? 16.5 : 24} className="anim-pulse" />
         {hasSave && <ImgButton label="처음부터" onClick={onReset} kind="wood" width={160} height={50} fontSize={15} />}
         <ImgButton label="메뉴 연습해보기" onClick={onPractice} kind="wood" width={200} height={56} fontSize={16} className="anim-bob" />
         <div className="flex items-center gap-1 mt-1">

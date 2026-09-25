@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { Sprite, SpriteBox } from '../Sprite';
 import { ImgButton } from '../ImgButton';
 import { useAssets } from '../../game/AssetContext';
@@ -6,6 +7,34 @@ import { SaveData, UpgradeId, UPGRADES } from '../../game/save';
 
 export function ShopScreen({ save, onBuy, onDone }: { save: SaveData; onBuy: (id: UpgradeId) => void; onDone: () => void }) {
   const { atlas, bg } = useAssets();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{ pointerId: number; x: number; y: number; left: number; top: number } | null>(null);
+
+  const beginScroll = (e: React.PointerEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('[data-shop-no-scroll="true"]')) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    dragRef.current = { pointerId: e.pointerId, x: e.clientX, y: e.clientY, left: el.scrollLeft, top: el.scrollTop };
+    el.setPointerCapture(e.pointerId);
+  };
+
+  const moveScroll = (e: React.PointerEvent<HTMLDivElement>) => {
+    const start = dragRef.current;
+    const el = scrollRef.current;
+    if (!start || !el || start.pointerId !== e.pointerId) return;
+    const rect = el.getBoundingClientRect();
+    const scaleX = el.clientWidth / Math.max(1, rect.width);
+    const scaleY = el.clientHeight / Math.max(1, rect.height);
+    el.scrollLeft = start.left - (e.clientX - start.x) * scaleX;
+    el.scrollTop = start.top - (e.clientY - start.y) * scaleY;
+    if (Math.abs(e.clientX - start.x) + Math.abs(e.clientY - start.y) > 4) e.preventDefault();
+  };
+
+  const endScroll = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragRef.current?.pointerId === e.pointerId) dragRef.current = null;
+  };
+
   return (
     <div className="absolute inset-0" style={{ backgroundImage: `url(${bg.kitchen})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
       <div className="absolute inset-0" style={{ background: 'rgba(15,6,3,0.78)' }} />
@@ -16,7 +45,21 @@ export function ShopScreen({ save, onBuy, onDone }: { save: SaveData; onBuy: (id
           <div className="font-black text-yellow-200 stroke" style={{ fontSize: 16 }}>{save.money.toLocaleString()}원</div>
         </div>
       </div>
-      <div className="absolute overflow-y-auto" style={{ left: 8, top: 66, width: 344, height: 490, touchAction: 'pan-y' }}>
+      <div
+        ref={scrollRef}
+        className="shop-scroll absolute"
+        style={{ left: 8, top: 66, width: 344, height: 490, touchAction: 'none', cursor: 'grab' }}
+        onPointerDown={beginScroll}
+        onPointerMove={moveScroll}
+        onPointerUp={endScroll}
+        onPointerCancel={endScroll}
+        onWheel={(e) => {
+          const el = scrollRef.current;
+          if (!el) return;
+          el.scrollTop += e.deltaY;
+          el.scrollLeft += e.deltaX;
+        }}
+      >
         <div className="grid grid-cols-2" style={{ gap: 6 }}>
           {UPGRADES.map((u) => {
             const owned = save.upgrades[u.id];
@@ -38,7 +81,7 @@ export function ShopScreen({ save, onBuy, onDone }: { save: SaveData; onBuy: (id
                       <div className="font-black" style={{ fontSize: 12, color: '#2e7d32' }}>구매 완료</div>
                     </div>
                   ) : (
-                    <ImgButton label={`${u.cost.toLocaleString()}원`} onClick={() => onBuy(u.id)} kind={can ? 'red' : 'wood'} disabled={!can} width={120} height={36} fontSize={13} style={{ marginTop: 2 }} />
+                    <ImgButton label={`${u.cost.toLocaleString()}원`} onClick={() => onBuy(u.id)} kind={can ? 'red' : 'wood'} disabled={!can} width={120} height={36} fontSize={13} style={{ marginTop: 2 }} noShopScroll />
                   )}
                 </div>
               </div>
